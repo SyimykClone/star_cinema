@@ -1,15 +1,21 @@
-import React  from "react";
+import React from "react";
+import { Link } from "react-router-dom";
+import "./Header.css";
 
-function Header(){
-    return(
-        <header style={{padding: '15px', background: '#333', color: '#fff'}}>
-            <nav>
-                <a href="/" style={{margin:'10px', color: 'white'}}>Главная</a>
-                <a href="/about" style={{margin:'10px', color: 'white'}}>О нас</a>
-                <a href="/contacts" style={{margin:'10px', color: 'white'}}>Контакты</a>
-                <a href="/movies" style={{margin:'10px', color: 'white'}}>Фильмы</a>
-            </nav>
-        </header>
-    )
+function Header() {
+  return (
+    <header className="header">
+      <div className="header-container">
+        <Link to="/" className="logo">
+          Star Cinema
+        </Link>
+        <nav className="nav">
+          <Link to="/" className="nav-link">Главная</Link>
+          <Link to="/movies" className="nav-link">Все фильмы</Link>
+        </nav>
+      </div>
+    </header>
+  );
 }
+
 export default Header;
