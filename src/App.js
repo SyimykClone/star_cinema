@@ -1,14 +1,22 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Provider } from 'react-redux';
-import { store } from './store/store';
+import store from './store/store';
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import HomePage from "./pages/HomePage";
 import MoviesListPage from "./pages/MoviesListPage";
 import MovieDetailPage from "./pages/MovieDetailPage";
 import FavoritesPage from "./pages/FavoritesPage";
+import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";
+import ProfilePage from "./pages/ProfilePage";
 import "./App.css";
+
+const ProtectedRoute = ({ children }) => {
+  const isAuthenticated = store.getState().auth.isAuthenticated;
+  return isAuthenticated ? children : <Navigate to="/login" />;
+};
 
 function App() {
   return (
@@ -21,7 +29,20 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/movies" element={<MoviesListPage />} />
               <Route path="/movies/:id" element={<MovieDetailPage />} />
-              <Route path="/favorites" element={<FavoritesPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              
+              <Route path="/favorites" element={
+                <ProtectedRoute>
+                  <FavoritesPage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
             </Routes>
           </main>
           <Footer />

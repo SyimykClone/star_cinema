@@ -1,33 +1,57 @@
-import { createReducer } from '@reduxjs/toolkit';
-import { addToFavorites, removeFromFavorites } from './actions';
+import { ADD_TO_FAVORITES, REMOVE_FROM_FAVORITES } from './actions';
 
-const loadFavoritesFromStorage = () => {
+const loadFavoritesForUser = () => {
   try {
-    const serializedState = localStorage.getItem('movieFavorites');
-    if (serializedState === null) {
-      return [];
+    const user = JSON.parse(localStorage.getItem('movieUser') || 'null');
+    if (user && user.favorites) {
+      return user.favorites;
     }
-    return JSON.parse(serializedState);
-  } catch (err) {
-    console.error('Error loading favorites from localStorage:', err);
+    
+    const favorites = localStorage.getItem('movieFavorites');
+    return favorites ? JSON.parse(favorites) : [];
+  } catch {
     return [];
   }
 };
 
 const initialState = {
-  favorites: loadFavoritesFromStorage()
+  favorites: loadFavoritesForUser()
 };
 
-const favoritesReducer = createReducer(initialState, (builder) => {
-  builder
-    .addCase(addToFavorites, (state, action) => {
+const favoritesReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case ADD_TO_FAVORITES:
       if (!state.favorites.some(fav => fav.id === action.payload.id)) {
-        state.favorites.push(action.payload);
+        const newFavorites = [...state.favorites, action.payload];
+        
+        const user = JSON.parse(localStorage.getItem('movieUser') || 'null');
+        if (user) {
+          user.favorites = newFavorites;
+          localStorage.setItem('movieUser', JSON.stringify(user));
+          
+          localStorage.setItem('movieFavorites', JSON.stringify(newFavorites));
+        }
+        
+        return { ...state, favorites: newFavorites };
       }
-    })
-    .addCase(removeFromFavorites, (state, action) => {
-      state.favorites = state.favorites.filter(fav => fav.id !== action.payload);
-    });
-});
+      return state;
+      
+    case REMOVE_FROM_FAVORITES:
+      const newFavorites = state.favorites.filter(fav => fav.id !== action.payload);
+      
+      const user = JSON.parse(localStorage.getItem('movieUser') || 'null');
+      if (user) {
+        user.favorites = newFavorites;
+        localStorage.setItem('movieUser', JSON.stringify(user));
+        
+        localStorage.setItem('movieFavorites', JSON.stringify(newFavorites));
+      }
+      
+      return { ...state, favorites: newFavorites };
+      
+    default:
+      return state;
+  }
+};
 
 export default favoritesReducer;
