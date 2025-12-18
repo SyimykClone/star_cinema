@@ -1,18 +1,23 @@
-// src/pages/MovieDetailPage.js
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSpring, animated } from '@react-spring/web';
+import { useSelector, useDispatch } from 'react-redux';
+import { addToFavorites, removeFromFavorites } from '../store/actions';
 import moviesData from "../data/movies.json";
 import "./MovieDetailPage.css";
 
 const MovieDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [relatedMovies, setRelatedMovies] = useState([]);
+  
+  const favorites = useSelector(state => state.favorites.favorites);
+  
+  const isFavorite = movie ? favorites.some(fav => fav.id === movie.id) : false;
 
-  // Анимации
   const fadeIn = useSpring({
     from: { opacity: 0, transform: 'translateY(20px)' },
     to: { opacity: 1, transform: 'translateY(0)' },
@@ -25,7 +30,6 @@ const MovieDetailPage = () => {
       if (foundMovie) {
         setMovie(foundMovie);
         
-        // Находим похожие фильмы по жанру
         const similar = moviesData.movies
           .filter(m => 
             m.id !== foundMovie.id && 
@@ -37,6 +41,16 @@ const MovieDetailPage = () => {
       setLoading(false);
     }, 800);
   }, [id]);
+
+  const handleFavoriteToggle = () => {
+    if (!movie) return;
+    
+    if (isFavorite) {
+      dispatch(removeFromFavorites(movie.id));
+    } else {
+      dispatch(addToFavorites(movie));
+    }
+  };
 
   if (loading) {
     return (
@@ -60,9 +74,13 @@ const MovieDetailPage = () => {
   return (
     <animated.div className="movie-detail-page" style={fadeIn}>
       <div className="movie-detail-container">
-        <button className="back-button" onClick={() => navigate(-1)}>
-          ← Назад к списку
-        </button>
+        <div className="detail-header">
+          <button className="back-button" onClick={() => navigate(-1)}>
+            ← Назад к списку
+          </button>
+          <div className="header-actions">
+          </div>
+        </div>
         
         <div className="movie-detail-content">
           <div className="movie-detail-poster">
@@ -79,7 +97,20 @@ const MovieDetailPage = () => {
           </div>
           
           <div className="movie-detail-info">
-            <h1 className="detail-title">{movie.title} <span className="detail-year">({movie.year})</span></h1>
+            <div className="detail-title-section">
+              <h1 className="detail-title">
+                {movie.title} 
+                <span className="detail-year">({movie.year})</span>
+              </h1>
+              <button 
+                className={`favorite-detail-btn ${isFavorite ? 'favorited' : ''}`}
+                onClick={handleFavoriteToggle}
+                title={isFavorite ? "Убрать из избранного" : "Добавить в избранное"}
+              >
+                {isFavorite ? '❤️' : '🤍'}
+                <span>{isFavorite ? 'В избранном' : 'В избранное'}</span>
+              </button>
+            </div>
             
             <div className="detail-meta">
               <span className="detail-genre">{movie.genre}</span>
@@ -123,6 +154,12 @@ const MovieDetailPage = () => {
                     {movie.isFeatured ? 'Новый в прокате' : 'В постоянном прокате'}
                   </span>
                 </div>
+                <div className="feature-item">
+                  <span className="feature-label">В избранном</span>
+                  <span className="feature-value">
+                    {isFavorite ? 'Да' : 'Нет'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -130,23 +167,50 @@ const MovieDetailPage = () => {
         
         {relatedMovies.length > 0 && (
           <div className="related-movies">
-            <h3>Похожие фильмы</h3>
+            <div className="related-header">
+              <h3>Похожие фильмы</h3>
+              <Link to="/movies" className="view-all-btn">
+                Все фильмы →
+              </Link>
+            </div>
             <div className="related-grid">
-              {relatedMovies.map(relatedMovie => (
-                <Link to={`/movies/${relatedMovie.id}`} key={relatedMovie.id} className="related-card">
-                  <img 
-                    src={relatedMovie.poster} 
-                    alt={relatedMovie.title}
-                    onError={(e) => {
-                      e.target.src = `https://via.placeholder.com/200x300/333/fff?text=${encodeURIComponent(relatedMovie.title)}`;
-                    }}
-                  />
-                  <div className="related-info">
-                    <h4>{relatedMovie.title}</h4>
-                    <span className="related-genre">{relatedMovie.genre}</span>
+              {relatedMovies.map(relatedMovie => {
+                const isRelatedFavorite = favorites.some(fav => fav.id === relatedMovie.id);
+                
+                return (
+                  <div key={relatedMovie.id} className="related-card-wrapper">
+                    <Link to={`/movies/${relatedMovie.id}`} className="related-card">
+                      <img 
+                        src={relatedMovie.poster} 
+                        alt={relatedMovie.title}
+                        onError={(e) => {
+                          e.target.src = `https://via.placeholder.com/200x300/333/fff?text=${encodeURIComponent(relatedMovie.title)}`;
+                        }}
+                      />
+                      <div className="related-info">
+                        <h4>{relatedMovie.title}</h4>
+                        <span className="related-genre">{relatedMovie.genre}</span>
+                        <span className="related-duration">{relatedMovie.duration}</span>
+                      </div>
+                    </Link>
+                    <button 
+                      className={`related-favorite-btn ${isRelatedFavorite ? 'favorited' : ''}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (isRelatedFavorite) {
+                          dispatch(removeFromFavorites(relatedMovie.id));
+                        } else {
+                          dispatch(addToFavorites(relatedMovie));
+                        }
+                      }}
+                      title={isRelatedFavorite ? "Убрать из избранного" : "Добавить в избранное"}
+                    >
+                      {isRelatedFavorite ? '❤️' : '🤍'}
+                    </button>
                   </div>
-                </Link>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

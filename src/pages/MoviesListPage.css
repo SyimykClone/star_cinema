@@ -317,3 +317,43 @@
     height: 350px;
   }
 }
+
+.favorite-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.favorite-button:hover {
+  background: white;
+  transform: scale(1.1);
+  box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+}
+
+.favorite-button.favorited {
+  background: #ff0000;
+  color: white;
+}
+
+.favorites-info {
+  margin-left: 20px;
+  color: #ff0000;
+  font-weight: bold;
+}
+
+.movie-card:hover .favorite-button {
+  background: white;
+}
