@@ -11,6 +11,10 @@
   margin-bottom:16px;
 }
 
+.bookings-controls{ display:flex; gap:12px; align-items:center; margin-bottom:12px; }
+.bookings-controls input{ padding:8px 10px; border-radius:8px; border:1px solid #ccc; }
+.bookings-controls select{ padding:8px 10px; border-radius:8px; border:1px solid #ccc; }
+
 .bookings-list{
   display:flex;
   flex-direction:column;
@@ -50,3 +54,5 @@
   text-align:center;
   padding:60px 20px;
 }
+
+.booking-info strong{ color:#dbeafe; }

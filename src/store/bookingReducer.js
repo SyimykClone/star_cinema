@@ -22,6 +22,8 @@ export default function bookingReducer(state = initialState, action) {
 
     case 'CANCEL_BOOKING':
       return { ...state, bookings: state.bookings.filter(b => b.id !== action.payload) };
+    case 'REMOVE_BOOKING':
+      return { ...state, bookings: state.bookings.filter(b => b.id !== action.payload) };
 
     default:
       return state;

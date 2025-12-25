@@ -1,4 +1,3 @@
-// src/pages/MoviesListPage.js
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
@@ -70,6 +69,11 @@ const MoviesListPage = () => {
   const [selectedSeat, setSelectedSeat] = useState(null);
   const [lastAttemptBooking, setLastAttemptBooking] = useState(null);
   const [localMessage, setLocalMessage] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [guests, setGuests] = useState(1);
+  const [date, setDate] = useState('');
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
     if (!lastAttemptBooking) return;
@@ -77,7 +81,6 @@ const MoviesListPage = () => {
     const found = bookings.some(b => b.movieId === movieId && b.seat === seat && b.showtime === showtime);
     if (found) {
       setLocalMessage('Место успешно забронировано');
-      // close panel after short delay
       setTimeout(() => {
         setActiveBookingMovieId(null);
         setSelectedSeat(null);
@@ -183,7 +186,20 @@ const MoviesListPage = () => {
                         <span className="movie-year">{movie.year}</span>
                         <div className="showtime-preview">
                           {movie.showtimes && movie.showtimes.slice(0, 2).map((time, i) => (
-                            <span key={i} className="showtime-preview-item">{time}</span>
+                            <button
+                              key={i}
+                              className="showtime-preview-item"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setActiveBookingMovieId(movie.id);
+                                setSelectedShowtime(time);
+                                setSelectedSeat(null);
+                                setLocalMessage('');
+                              }}
+                            >
+                              {time}
+                            </button>
                           ))}
                         </div>
                         <div className="booking-actions">
@@ -197,6 +213,31 @@ const MoviesListPage = () => {
                                   ))}
                                 </select>
                               </label>
+
+                                <div className="booking-fields">
+                                  <div className="field-row">
+                                    <label>Имя клиента</label>
+                                    <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+                                    {formErrors.name && <div className="field-error">{formErrors.name}</div>}
+                                  </div>
+
+                                  <div className="field-row">
+                                    <label>Телефон</label>
+                                    <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                                  </div>
+
+                                  <div className="field-row small">
+                                    <label>Гостей</label>
+                                    <input type="number" min="1" value={guests} onChange={(e) => setGuests(e.target.value)} />
+                                    {formErrors.guests && <div className="field-error">{formErrors.guests}</div>}
+                                  </div>
+
+                                  <div className="field-row small">
+                                    <label>Дата</label>
+                                    <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                                    {formErrors.date && <div className="field-error">{formErrors.date}</div>}
+                                  </div>
+                                </div>
 
                               <div className="seats-grid">
                                 {['A','B','C','D'].map(row => (
@@ -223,9 +264,26 @@ const MoviesListPage = () => {
                                   disabled={!selectedSeat || !selectedShowtime}
                                     onClick={(ev) => {
                                     ev.preventDefault(); ev.stopPropagation();
-                                    if (!selectedSeat || !selectedShowtime) { setLocalMessage('Выберите сеанс и место'); return; }
+                                    const errors = {};
+                                    if (!selectedSeat || !selectedShowtime) errors.selection = 'Выберите сеанс и место';
+                                    if (!customerName || customerName.trim() === '') errors.name = 'Имя не должно быть пустым';
+                                    if (!date) errors.date = 'Выберите дату';
+                                    if (!guests || Number(guests) < 1) errors.guests = 'Количество гостей должно быть ≥ 1';
+                                    setFormErrors(errors);
+                                    if (Object.keys(errors).length) return;
+
                                     const userId = isAuthenticated && user ? user.id : null;
-                                    dispatch(bookSeat(movie.id, selectedSeat, userId, selectedShowtime));
+                                    const bookingData = {
+                                      seat: selectedSeat,
+                                      showtime: selectedShowtime,
+                                      userId,
+                                      customerName: customerName.trim(),
+                                      phone: phone.trim(),
+                                      guests: Number(guests),
+                                      date
+                                    };
+
+                                    dispatch(bookSeat(movie.id, bookingData));
                                     setLastAttemptBooking({ movieId: movie.id, seat: selectedSeat, showtime: selectedShowtime });
                                   }}
                                 >Подтвердить</button>
