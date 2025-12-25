@@ -229,6 +229,14 @@
   border-top: 1px solid #eee;
 }
 
+/* When booking panel is open place controls under showtimes so seats are visible */
+.movie-footer.booking-open{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:10px;
+}
+
 .movie-year {
   color: #ff0000;
   font-weight: bold;
@@ -238,7 +246,23 @@
 .showtime-preview {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
+
+/* ensure showtimes take full width when booking panel is open */
+.movie-footer.booking-open .showtime-preview {
+  width: 100%;
+}
+
+/* booking actions should occupy full width under showtimes when open */
+.movie-footer.booking-open .booking-actions {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* when not open, keep booking actions aligned to the right */
+.movie-footer .booking-actions { margin-left: auto; }
 
 .showtime-preview-item {
   background: #f0f0f0;
@@ -356,4 +380,34 @@
 
 .movie-card:hover .favorite-button {
   background: white;
+}
+
+/* Booking panel styles */
+.booking-panel{
+  margin-top:10px;
+  padding:12px;
+  background: linear-gradient(180deg, #ffffff, #fafafa);
+  border-radius:10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  width:100%;
+  max-width:420px; /* keep panel compact so it doesn't overflow */
+}
+
+.seats-grid{ display:flex; flex-direction:column; gap:6px; margin:8px 0; max-width:100%; overflow:auto; }
+.seat-row{ display:flex; gap:6px; flex-wrap:wrap; }
+.seat{ padding:6px 8px; border-radius:6px; background:#f2f2f2; border:1px solid #e0e0e0; cursor:pointer; }
+.seat.occupied{ background:#ddd; color:#888; cursor:not-allowed; }
+.seat.selected{ background:#ff6b6b; color:white; border-color:#ff6b6b; }
+
+.booking-panel-actions{ display:flex; gap:8px; margin-top:8px; }
+.confirm-book-button{ background:#ff3b3b; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
+.confirm-book-button:disabled{ opacity:0.6; cursor:not-allowed; }
+.cancel-book-button{ background:transparent; color:#333; border:1px solid #ddd; padding:8px 12px; border-radius:8px; cursor:pointer; }
+
+.booking-message{ margin-top:8px; color:#0b7a0b; font-weight:600; }
+
+/* Place primary book button below showtime items on small screens as a fallback */
+@media (max-width: 900px) {
+  .movie-footer { flex-direction: column; align-items: flex-start; }
+  .booking-panel { max-width:100%; }
 }

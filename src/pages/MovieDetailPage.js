@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSpring, animated } from '@react-spring/web';
 import { useSelector, useDispatch } from 'react-redux';
 import { addToFavorites, removeFromFavorites } from '../store/actions';
+import AuthPrompt from '../components/AuthPrompt';
 import moviesData from "../data/movies.json";
 import "./MovieDetailPage.css";
 
@@ -15,6 +16,8 @@ const MovieDetailPage = () => {
   const [relatedMovies, setRelatedMovies] = useState([]);
   
   const favorites = useSelector(state => state.favorites.favorites);
+  const { isAuthenticated } = useSelector(state => state.auth);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   
   const isFavorite = movie ? favorites.some(fav => fav.id === movie.id) : false;
 
@@ -44,7 +47,11 @@ const MovieDetailPage = () => {
 
   const handleFavoriteToggle = () => {
     if (!movie) return;
-    
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
+
     if (isFavorite) {
       dispatch(removeFromFavorites(movie.id));
     } else {
@@ -73,6 +80,7 @@ const MovieDetailPage = () => {
 
   return (
     <animated.div className="movie-detail-page" style={fadeIn}>
+      <AuthPrompt open={showAuthPrompt} onClose={() => setShowAuthPrompt(false)} />
       <div className="movie-detail-container">
         <div className="detail-header">
           <button className="back-button" onClick={() => navigate(-1)}>
@@ -198,6 +206,7 @@ const MovieDetailPage = () => {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        if (!isAuthenticated) { setShowAuthPrompt(true); return; }
                         if (isRelatedFavorite) {
                           dispatch(removeFromFavorites(relatedMovie.id));
                         } else {

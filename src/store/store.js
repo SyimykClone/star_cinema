@@ -1,13 +1,16 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
+import { thunk } from 'redux-thunk';
 import moviesReducer from './moviesReducer'; 
 import favoritesReducer from './favoritesReducer';
 import authReducer from './authReducer';
 import authMiddleware from './authMiddleware';
+import bookingReducer from './bookingReducer';
 
 const rootReducer = combineReducers({
   favorites: favoritesReducer,
   auth: authReducer,
-  movies: moviesReducer
+  movies: moviesReducer,
+  booking: bookingReducer
 });
 
 const favoritesMiddleware = store => next => action => {
@@ -26,7 +29,7 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(
   rootReducer,
   composeEnhancers(
-    applyMiddleware(authMiddleware, favoritesMiddleware)
+    applyMiddleware(authMiddleware, favoritesMiddleware, thunk)
   )
 );
 

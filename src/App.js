@@ -8,6 +8,7 @@ import HomePage from "./pages/HomePage";
 import MoviesListPage from "./pages/MoviesListPage";
 import MovieDetailPage from "./pages/MovieDetailPage";
 import FavoritesPage from "./pages/FavoritesPage";
+import BookingsPage from "./pages/BookingsPage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -35,6 +36,12 @@ function App() {
               <Route path="/favorites" element={
                 <ProtectedRoute>
                   <FavoritesPage />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/bookings" element={
+                <ProtectedRoute>
+                  <BookingsPage />
                 </ProtectedRoute>
               } />
               

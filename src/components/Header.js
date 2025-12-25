@@ -25,27 +25,30 @@ function Header() {
     <header className="header">
       <div className="header-container">
         <Link to="/" className="logo">
-          🎬 Star Cinema
+          Star Cinema
         </Link>
         <nav className="nav">
           <Link to="/" className="nav-link">Главная</Link>
           <Link to="/movies" className="nav-link">Все фильмы</Link>
           
           {isAuthenticated && (
-            <Link to="/favorites" className="nav-link favorites-link">
-              ❤️ Избранное
-              {favoritesCount > 0 && (
-                <span className={getCounterClass()}>
-                  {favoritesCount > 99 ? '99+' : favoritesCount}
-                </span>
-              )}
-            </Link>
+            <>
+              <Link to="/bookings" className="nav-link">Мои бронирования</Link>
+              <Link to="/favorites" className="nav-link favorites-link">
+                Избранное
+                {favoritesCount > 0 && (
+                  <span className={getCounterClass()}>
+                    {favoritesCount > 99 ? '99+' : favoritesCount}
+                  </span>
+                )}
+              </Link>
+            </>
           )}
           
           {isAuthenticated ? (
             <div className="user-menu">
               <span className="user-greeting">
-                👋 Привет, {user?.name?.split(' ')[0] || 'Пользователь'}
+                Привет, {user?.name?.split(' ')[0] || 'Пользователь'}
               </span>
               <button className="logout-btn" onClick={handleLogout}>
                 Выйти
@@ -54,9 +57,7 @@ function Header() {
           ) : (
             <>
               <Link to="/login" className="nav-link">Войти</Link>
-              <Link to="/register" className="nav-link register-btn">
-                Регистрация
-              </Link>
+              <Link to="/register" className="nav-link register-btn">Регистрация</Link>
             </>
           )}
         </nav>

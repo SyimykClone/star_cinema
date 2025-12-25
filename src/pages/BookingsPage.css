@@ -1,0 +1,52 @@
+.bookings-page{
+  max-width:1100px;
+  margin:30px auto;
+  padding:20px;
+}
+
+.bookings-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+
+.bookings-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.booking-card{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  border-radius:10px;
+  background: linear-gradient(180deg, #0f1724, #0b1220);
+  border:1px solid rgba(255,255,255,0.03);
+}
+
+.booking-info div{
+  color:#e6eef8;
+  margin-bottom:6px;
+}
+
+.booking-actions .cancel-booking{
+  background:#2d2d2d;
+  color:#fff;
+  border:1px solid rgba(255,255,255,0.06);
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.booking-actions .cancel-booking:hover{
+  background:#ff3b3b;
+  border-color:#ff3b3b;
+}
+
+.bookings-page.empty{
+  text-align:center;
+  padding:60px 20px;
+}

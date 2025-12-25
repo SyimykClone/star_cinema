@@ -2,16 +2,22 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
-import { addToFavorites, removeFromFavorites } from '../store/actions';
+import { addToFavorites, removeFromFavorites, bookSeat, fetchBookings } from '../store/actions';
+import AuthPrompt from '../components/AuthPrompt';
 import "./MoviesListPage.css";
 
 const MoviesListPage = () => {
   const dispatch = useDispatch();
   const movies = useSelector(state => state.movies.movies);
   const favorites = useSelector(state => state.favorites.favorites);
+  const { isAuthenticated, user } = useSelector(state => state.auth);
   const [search, setSearch] = useState("");
   const [genreFilter, setGenreFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+
+  const bookings = useSelector(state => state.booking ? state.booking.bookings : []);
+  const bookingError = useSelector(state => state.booking ? state.booking.error : null);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
   // Получаем уникальные жанры
   const genres = ["all", ...new Set(movies.flatMap(movie => 
@@ -36,7 +42,11 @@ const MoviesListPage = () => {
   const handleFavoriteToggle = (movie, e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
+
     if (isFavorite(movie.id)) {
       dispatch(removeFromFavorites(movie.id));
     } else {
@@ -50,8 +60,43 @@ const MoviesListPage = () => {
     }, 800);
   }, []);
 
+  useEffect(() => {
+    // fetch persisted bookings on mount
+    dispatch(fetchBookings());
+  }, [dispatch]);
+
+  const [activeBookingMovieId, setActiveBookingMovieId] = useState(null);
+  const [selectedShowtime, setSelectedShowtime] = useState('');
+  const [selectedSeat, setSelectedSeat] = useState(null);
+  const [lastAttemptBooking, setLastAttemptBooking] = useState(null);
+  const [localMessage, setLocalMessage] = useState('');
+
+  useEffect(() => {
+    if (!lastAttemptBooking) return;
+    const { movieId, seat, showtime } = lastAttemptBooking;
+    const found = bookings.some(b => b.movieId === movieId && b.seat === seat && b.showtime === showtime);
+    if (found) {
+      setLocalMessage('Место успешно забронировано');
+      // close panel after short delay
+      setTimeout(() => {
+        setActiveBookingMovieId(null);
+        setSelectedSeat(null);
+        setLastAttemptBooking(null);
+        setLocalMessage('');
+      }, 900);
+    }
+  }, [bookings, lastAttemptBooking]);
+
+  useEffect(() => {
+    if (bookingError) {
+      setLocalMessage(bookingError);
+      setTimeout(() => setLocalMessage(''), 2000);
+    }
+  }, [bookingError]);
+
   return (
     <div className="movies-list-page">
+      <AuthPrompt open={showAuthPrompt} onClose={() => setShowAuthPrompt(false)} />
       <div className="page-header">
         <h1>Все фильмы</h1>
         <p>Выберите фильм для просмотра детальной информации</p>
@@ -134,12 +179,77 @@ const MoviesListPage = () => {
                         <span className="movie-duration">{movie.duration}</span>
                       </div>
                       <p className="movie-description">{movie.description}</p>
-                      <div className="movie-footer">
+                      <div className={`movie-footer ${activeBookingMovieId === movie.id ? 'booking-open' : ''}`}>
                         <span className="movie-year">{movie.year}</span>
                         <div className="showtime-preview">
                           {movie.showtimes && movie.showtimes.slice(0, 2).map((time, i) => (
                             <span key={i} className="showtime-preview-item">{time}</span>
                           ))}
+                        </div>
+                        <div className="booking-actions">
+                          {activeBookingMovieId === movie.id ? (
+                            <div className="booking-panel" onClick={(e) => e.stopPropagation()}>
+                              <label>
+                                Сеанс:
+                                <select value={selectedShowtime} onChange={(e) => setSelectedShowtime(e.target.value)}>
+                                  {(movie.showtimes || []).map((t) => (
+                                    <option key={t} value={t}>{t}</option>
+                                  ))}
+                                </select>
+                              </label>
+
+                              <div className="seats-grid">
+                                {['A','B','C','D'].map(row => (
+                                  <div key={row} className="seat-row">
+                                    {Array.from({length:6}, (_,i) => `${row}${i+1}`).map(seat => {
+                                      const occupied = bookings.some(b => b.movieId === movie.id && b.showtime === selectedShowtime && b.seat === seat);
+                                      const isSelected = selectedSeat === seat;
+                                      return (
+                                        <button
+                                          key={seat}
+                                          className={`seat ${occupied ? 'occupied' : ''} ${isSelected ? 'selected' : ''}`}
+                                          disabled={occupied}
+                                          onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); setSelectedSeat(seat); }}
+                                        >{seat}</button>
+                                      );
+                                    })}
+                                  </div>
+                                ))}
+                              </div>
+
+                              <div className="booking-panel-actions">
+                                <button
+                                  className="confirm-book-button"
+                                  disabled={!selectedSeat || !selectedShowtime}
+                                    onClick={(ev) => {
+                                    ev.preventDefault(); ev.stopPropagation();
+                                    if (!selectedSeat || !selectedShowtime) { setLocalMessage('Выберите сеанс и место'); return; }
+                                    const userId = isAuthenticated && user ? user.id : null;
+                                    dispatch(bookSeat(movie.id, selectedSeat, userId, selectedShowtime));
+                                    setLastAttemptBooking({ movieId: movie.id, seat: selectedSeat, showtime: selectedShowtime });
+                                  }}
+                                >Подтвердить</button>
+                                <button className="cancel-book-button" onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); setActiveBookingMovieId(null); setSelectedSeat(null); setLocalMessage(''); }}>Отмена</button>
+                              </div>
+
+                              {localMessage && <div className="booking-message">{localMessage}</div>}
+                            </div>
+                          ) : (
+                            <button
+                              className="book-button"
+                              onClick={(e) => {
+                                e.preventDefault(); e.stopPropagation();
+                                if (!isAuthenticated) { setShowAuthPrompt(true); return; }
+                                setActiveBookingMovieId(movie.id);
+                                setSelectedShowtime(movie.showtimes && movie.showtimes[0] ? movie.showtimes[0] : '');
+                                setSelectedSeat(null);
+                                setLocalMessage('');
+                              }}
+                              title="Забронировать"
+                            >
+                              Забронировать
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
