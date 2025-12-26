@@ -96,8 +96,8 @@ const HomePage = () => {
       )}
 
       <animated.section className="movies-section" style={cardsAnimation}>
-        <h2 className="section-title">Все фильмы в прокате</h2>
-        <p className="section-subtitle">Полный список доступных фильмов в нашем кинотеатре</p>
+        <h2 className="section-title" style={{ color: "white" }}>Все фильмы в прокате</h2>
+        <p className="section-subtitle" style={{ color: "white" }}>Полный список доступных фильмов в нашем кинотеатре</p>
         
         {loading ? (
           <div className="loading-container">
@@ -141,7 +141,7 @@ const HomePage = () => {
                         }}
                       />
                     </div>
-                    <div className="movie-info">
+                    <div className="movie-info " >
                       <h3 className="movie-title">
                         {movie.title} 
                         <span className="movie-year-small"> ({movie.year})</span>

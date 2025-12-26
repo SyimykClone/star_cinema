@@ -1,0 +1,50 @@
+:root{
+  --bg:#07101a;
+  --card:#0f1724;
+  --muted:#9fbfe7;
+  --accent:#ff3b3b;
+  --accent-2:#ff6b6b;
+  --glass: rgba(255,255,255,0.04);
+  --text:#e6eef8;
+  --surface:#071727;
+  --radius:12px;
+  --shadow: 0 8px 30px rgba(2,6,23,0.6);
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+*{box-sizing:border-box}
+html,body,#root{height:100%;}
+body{
+  margin:0;
+  background: linear-gradient(180deg,var(--bg), #03101a 80%);
+  font-family:var(--font-sans);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+a{ color:var(--muted); text-decoration:none }
+a:hover{ color: #fff }
+
+.container{ max-width:1200px; margin:0 auto; padding:0 16px }
+
+/* Buttons */
+.btn{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px; border:none; cursor:pointer; background:var(--accent); color:#fff; font-weight:600 }
+.btn.secondary{ background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--text) }
+
+/* Cards */
+.card{ background:var(--card); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); border:1px solid rgba(255,255,255,0.03) }
+
+/* Inputs */
+input,select,textarea{ padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:var(--text) }
+
+/* Utility spacing */
+.row{ display:flex; gap:12px; }
+
+/* Smooth headings */
+h1,h2,h3,h4{ color:var(--text); margin:0 }
+
+/* Small responsive tweaks */
+@media(max-width:768px){
+  .container{ padding:0 12px }
+}
